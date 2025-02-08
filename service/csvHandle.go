@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/omniful/go_commons/csv"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"os"
 	"strconv"
@@ -25,6 +24,7 @@ func CSVOperation(filePath string) ([]*domain.Order, error) {
 	}(file)
 
 	orderGroups := make(map[string]*domain.Order)
+
 	CSV, err := csv.NewCommonCSV(
 		csv.WithBatchSize(100),
 		csv.WithSource(csv.Local),
@@ -55,29 +55,28 @@ func CSVOperation(filePath string) ([]*domain.Order, error) {
 			orderNo := record[0]
 			customerName := record[1]
 			skuID := record[2]
-			quantityStr := record[3]
+			quantity := record[3]
 
-			quantity, err := strconv.Atoi(quantityStr)
+			quantity, err := strconv.Atoi(quantity)
 			if err != nil {
-				return nil, fmt.Errorf("invalid quantity %s: %v", quantityStr, err)
+				return nil, fmt.Errorf("invalid quantity %s: %v", quantity, err)
 			}
 
 			orderKey := fmt.Sprintf("%s-%s", orderNo, customerName)
 			order, exists := orderGroups[orderKey]
 			if !exists {
-				now := primitive.NewDateTimeFromTime(time.Now())
 				order = &domain.Order{
 					ID:         orderNo,
-					HubID:      string,
-					TenantID:   string,
 					UserName:   customerName,
 					OrderItems: []domain.OrderItem{},
 					Status:     "on_hold",
-					CreatedAt:  now,
-					UpdatedAt:  now,
+					CreatedAt:  time.Now(),
+					UpdatedAt:  time.Now(),
 				}
 				orderGroups[orderKey] = order
 			}
+
+			skuID, _ = strconv.Atoi(record[4])
 
 			orderItem := domain.OrderItem{
 				SKU_ID:   skuID,
@@ -91,6 +90,5 @@ func CSVOperation(filePath string) ([]*domain.Order, error) {
 	for _, order := range orderGroups {
 		orders = append(orders, order)
 	}
-
 	return orders, nil
 }

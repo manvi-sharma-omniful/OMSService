@@ -5,21 +5,24 @@ import (
 	"awesomeProject/Project/OMS/service"
 	"context"
 	"github.com/omniful/go_commons/config"
+	"github.com/omniful/go_commons/kafka"
 	"github.com/omniful/go_commons/log"
 )
 
 func Initialize(ctx context.Context) {
 	initializeLog(ctx)
 	initializeDB(ctx)
-	initialiseSQSProducer(ctx)
-	initialiseSQSConsumer(ctx)
-}
-
-func initialiseSQSConsumer(ctx context.Context) {
+	initializeSQSProducer(ctx)
+	initializeSQSConsumer(ctx)
+	initializeKafkaProducer(ctx)
 
 }
 
-func initialiseSQSProducer(ctx context.Context) {
+func initializeSQSConsumer(ctx context.Context) {
+
+}
+
+func initializeSQSProducer(ctx context.Context) {
 
 }
 
@@ -41,4 +44,19 @@ func initializeDB(ctx context.Context) {
 	dbase := connector.DB.Database("OMS")
 	userCollection := dbase.Collection("orders")
 	service.SetupOrderCollection(userCollection)
+}
+
+func initializeKafkaProducer(ctx context.Context) {
+	kafkaBrokers := config.GetStringSlice(ctx, "onlineKafka.brokers")
+	kafkaClientID := config.GetString(ctx, "onlineKafka.clientId")
+	kafkaVersion := config.GetString(ctx, "onlineKafka.version")
+
+	producer := kafka.NewProducer(
+		kafka.WithBrokers(kafkaBrokers),
+		kafka.WithClientID(kafkaClientID),
+		kafka.WithKafkaVersion(kafkaVersion),
+	)
+
+	log.Printf("Initialized Kafka Producer")
+	kafka_producer.Set(producer)
 }

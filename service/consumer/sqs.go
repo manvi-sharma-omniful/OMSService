@@ -1,43 +1,43 @@
-package listeners
+package service
 
 import (
-	"awesomeProject/Project/OMS/service"
 	"context"
 	"fmt"
 	"log"
 	"time"
 
+	"awesomeProject/Project/OMS/service"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
-	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
+	"github.com/aws/aws-sdk-go-v2/service/sqs/types" //
 )
 
 type SqsConsumer struct {
-	QueueURL  string
+	QURL      string
 	SqsClient *sqs.Client
 }
 
-func NewSqsConsumer(queueURL string, ctx context.Context) (*SqsConsumer, error) {
-	if queueURL == "" {
+func NewSqsConsumer(qURL string, ctx context.Context) (*SqsConsumer, error) {
+	if qURL == "" {
 		return nil, fmt.Errorf("no QUEUE_URL specified")
 	}
 
-	cfg, err := config.LoadDefaultConfig(ctx)
+	cnfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return &SqsConsumer{
-		QueueURL:  queueURL,
-		SqsClient: sqs.NewFromConfig(cfg),
+		QURL:      qURL,
+		SqsClient: sqs.NewFromConfig(cnfg),
 	}, nil
 }
 
 func (c *SqsConsumer) StartConsumer(ctx context.Context) {
 	for {
 		receiveMessages := &sqs.ReceiveMessageInput{
-			QueueUrl:            aws.String(c.QueueURL),
+			QueueUrl:            aws.String(c.QURL),
 			MaxNumberOfMessages: 10,
 			WaitTimeSeconds:     5,
 		}
@@ -55,18 +55,18 @@ func (c *SqsConsumer) StartConsumer(ctx context.Context) {
 				c.DeleteMessage(ctx, message.ReceiptHandle)
 			}
 		}
-		time.Sleep(1 * time.Second)
+		time.Sleep(time.Second * 2)
 	}
 }
+
 func (c *SqsConsumer) ProcessMessage(ctx context.Context, msg *types.Message) error {
-	fmt.Println("Received message:", *msg.Body)
 	service.GetOrders(*msg.Body)
 	return nil
 }
 
 func (c *SqsConsumer) DeleteMessage(ctx context.Context, receiptHandle *string) {
 	_, err := c.SqsClient.DeleteMessage(ctx, &sqs.DeleteMessageInput{
-		QueueUrl:      aws.String(c.QueueURL),
+		QueueUrl:      aws.String(c.QURL),
 		ReceiptHandle: receiptHandle,
 	})
 

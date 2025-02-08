@@ -5,9 +5,9 @@ mongo:
   database: "oms"
   collection: "orders"
 sqs:
-  name: "sqs1"
+  name: "First"
   workerCount: 1
-  region: ""
-  endpoint: ""
-  account: ""
+  region: "eu-north-1"
+  endpoint: "https://sqs.eu-north-1.amazonaws.com/061039762751/First"
+  account: "061039762751"
   concurrencyPerWorker: 1

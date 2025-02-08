@@ -17,7 +17,7 @@ type Connection struct {
 }
 
 func getDatabaseUri() string {
-	return "mongodb://127.0.0.1:27017/OMS"
+	return "mongodb://127.0.0.1:27017"
 }
 
 func (C *Connection) ConnectMongo(con context.Context) {
@@ -31,9 +31,5 @@ func (C *Connection) ConnectMongo(con context.Context) {
 		fmt.Println("Error connecting to MongoDB:", err)
 		return
 	}
-	err = C.DB.Ping(ctx, nil)
-	if err != nil {
-		fmt.Println("Failed to ping MongoDB:", err)
-		return
-	}
+
 }
