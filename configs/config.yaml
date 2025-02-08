@@ -1,0 +1,13 @@
+server:
+  port: ":8280"
+mongo:
+  uri: "mongodb://localhost:27017"
+  database: "oms"
+  collection: "orders"
+sqs:
+  name: "sqs1"
+  workerCount: 1
+  region: ""
+  endpoint: ""
+  account: ""
+  concurrencyPerWorker: 1
